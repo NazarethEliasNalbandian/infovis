@@ -2,7 +2,7 @@ import pandas as pd
 import chess.pgn
 
 # Ruta del archivo PGN
-pgn_file = "/Users/nazarethnalbandian/Desktop/DATOS AJEDREZ/chess_com_games.pgn"
+pgn_file = "/Users/nazarethnalbandian/infovis/DATOS AJEDREZ/chess_com_games.pgn"
 
 # Lista para almacenar los datos de las partidas
 data = []
@@ -14,7 +14,7 @@ with open(pgn_file) as pgn:
         if game is None:
             break
 
-        # Extraer información de la partida
+        # Determinar el color de NachiBrBa y el resultado de la partida
         color_nachi = "Blanco" if game.headers["White"] == "NachiBrBa" else "Negro"
         resultado = game.headers["Result"]
         if resultado == "1-0":
@@ -24,13 +24,21 @@ with open(pgn_file) as pgn:
         else:
             resultado_nachi = "Empate"
         
-        elo_nachi = game.headers.get("WhiteElo") if color_nachi == "Blanco" else game.headers.get("BlackElo")
+        # Obtener el ELO de NachiBrBa y del oponente
+        if color_nachi == "Blanco":
+            elo_nachi = game.headers.get("WhiteElo")
+            elo_oponente = game.headers.get("BlackElo")
+        else:
+            elo_nachi = game.headers.get("BlackElo")
+            elo_oponente = game.headers.get("WhiteElo")
+
         fecha_partida = game.headers.get("Date", "Desconocida")
 
         # Añadir los datos a la lista
         data.append({
             "Fecha de partida": fecha_partida,
             "ELO": elo_nachi,
+            "ELO_oponente": elo_oponente,
             "Color": color_nachi,
             "Resultado": resultado_nachi,
         })
@@ -39,7 +47,7 @@ with open(pgn_file) as pgn:
 df = pd.DataFrame(data)
 
 # Guardar el DataFrame en un archivo CSV
-csv_file = "/Users/nazarethnalbandian/Desktop/DATOS AJEDREZ/nachi_chess_games.csv"
+csv_file = "/Users/nazarethnalbandian/infovis/DATOS AJEDREZ/nachi_chess_games_with_opponent_elo.csv"
 df.to_csv(csv_file, index=False)
 
-csv_file
+print(f"Archivo CSV guardado en: {csv_file}")
